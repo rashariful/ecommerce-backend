@@ -1,0 +1,13 @@
+const { default: mongoose } = require("mongoose");
+// const app = require ("./app");
+
+const dbConnect = () => {
+  try {
+    mongoose.set("strictQuery", false);
+    const conn = mongoose.connect(process.env.MONGODB_URL);
+    console.log("Database Connected Successfully");
+  } catch (error) {
+    console.log("DAtabase error");
+  }
+};
+module.exports = dbConnect;
