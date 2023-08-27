@@ -20,11 +20,10 @@ var orderSchema = new mongoose.Schema(
       enum: [
         "panding",
         "confirmed",
-        "Processing",
+        "processing",
         "shipped",
-        "Delivered",
-        "Cancelled",
-        "Cash on Delivery",
+        "delivered",
+        "cancelled",
       ],
     },
     orderby: {

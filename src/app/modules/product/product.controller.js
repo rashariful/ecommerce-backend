@@ -34,6 +34,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     const excludeFields = ["page", "sort", "limit", "fields"];
 
     excludeFields.forEach((el) => delete queryObj[el]);
+    
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
@@ -75,6 +76,21 @@ const getAllProduct = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
+// server.js
+// const getProductBySearch = asyncHandler ("/api/search", async (req, res) => {
+//   try {
+//     const query = req.query.query;
+//     // Fetch products from your database based on the query
+//     const searchResults = await Product.find({ title: { $regex: query, $options: "i" } });
+//     res.json(searchResults);
+//   } catch (error) {
+//     console.error("Error fetching search results:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+
 
 const updateProduct = asyncHandler(async (req, res) => {
   const {id} = req.params
@@ -221,6 +237,7 @@ module.exports = {
   createProduct,
   getaProduct,
   getAllProduct,
+  // getProductBySearch,
   updateProduct,
   deleteProduct,
   addToWishlist,

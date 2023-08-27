@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/create-color",  createColor);
 router.put("/:id", authMiddleware,  updateColor);
-router.delete("/:id", authMiddleware,  deleteColor);
+router.delete("/:id",  deleteColor);
 router.get("/:id", getColor);
 router.get("/", getallColor);
 

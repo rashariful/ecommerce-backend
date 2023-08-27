@@ -6,11 +6,20 @@ const asyncHandler = require("express-async-handler");
 const createCategory = asyncHandler(async (req, res) => {
   try {
     const newCategory = await Category.create(req.body);
-    res.json(newCategory);
+    res.status(200).json({
+      success: true,
+      message: `create product Category successfully`,
+      data: newCategory
+    });
   } catch (error) {
-    throw new Error(error);
+    res.status(400).json({
+      success: false,
+      message: `Can't create product Category`,
+      data: error
+    });
   }
 });
+
 const updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -23,6 +32,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const deleteCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -33,6 +43,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const getCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -43,6 +54,7 @@ const getCategory = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const getallCategory = asyncHandler(async (req, res) => {
   try {
     const getallCategory = await Category.find();
@@ -51,6 +63,7 @@ const getallCategory = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 module.exports = {
   createCategory,
   updateCategory,

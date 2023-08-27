@@ -21,10 +21,7 @@ const {
   getUserCart,
   emptyCart,
   applyCoupon,
-  createOrder,
-  getOrders,
-  updateOrderStatus,
-  getAllOrders,
+  getAdminByEmailController,
 } = require("./user.controller");
 const { authMiddleware, isAdmin } = require("../../middlewares/authMiddleware");
 
@@ -35,6 +32,7 @@ const router = express.Router();
 router.post("/register", createUser);
 router.post("/login", loginUserCtrl);
 router.post("/admin-login", loginAdmin);
+router.get("/admin/:email", getAdminByEmailController);
 router.get("/logout", logout);
 
 router.get("/all-users", getallUser);
@@ -52,11 +50,6 @@ router.put("/password", authMiddleware, updatePassword);
 
 router.post("/cart/create-cart", authMiddleware, userCart);
 router.post("/cart/applycoupon", authMiddleware, applyCoupon);
-router.post("/cart/cash-order",authMiddleware,createOrder);
-
-router.get("/get-orders", authMiddleware, getOrders);
-router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
-router.post("/getorderbyuser/:id", authMiddleware, isAdmin, getAllOrders);
 
 router.get("/refresh", handleRefreshToken);
 router.get("/wishlist", authMiddleware, getWishlist);
@@ -64,10 +57,6 @@ router.get("/wishlist", authMiddleware, getWishlist);
 router.get("/cart", authMiddleware, getUserCart);
 router.get("/:id", authMiddleware, isAdmin, getaUser);
 router.delete("/empty-cart", authMiddleware, emptyCart);
-
-
-
-router.put("/order/update-order/:id",authMiddleware,isAdmin, updateOrderStatus);
 
 module.exports =  router;
 

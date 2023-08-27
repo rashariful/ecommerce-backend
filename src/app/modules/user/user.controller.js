@@ -42,10 +42,13 @@ const createUser = async (req, res) => {
 // Login a user
 const loginUserCtrl = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  // console.log(email,password)
   // check if user exists or not
   const findUser = await User.findOne({ email });
+
   if (findUser && (await findUser.isPasswordMatched(password))) {
     const refreshToken = await generateRefreshToken(findUser?._id);
+
     const updateuser = await User.findByIdAndUpdate(
       findUser.id,
       {
@@ -53,14 +56,19 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 72 * 60 * 60 * 1000,
     });
-    res.json({
-      _id: findUser?._id,
-      firstname: findUser?.firstname,
-      lastname: findUser?.lastname,
+    
+    res.status(200).json({
+      success: true,
+      message: "user login successfull",
+      userId: findUser?._id,
+      role: findUser?.role,
+      firstname: findUser?.firstName,
+      lastname: findUser?.lastName,
       email: findUser?.email,
       mobile: findUser?.mobile,
       token: generateToken(findUser?._id),
@@ -92,8 +100,8 @@ const loginAdmin = asyncHandler(async (req, res) => {
     });
     res.json({
       _id: findAdmin?._id,
-      firstname: findAdmin?.firstname,
-      lastname: findAdmin?.lastname,
+      firstname: findAdmin?.firstName,
+      lastname: findAdmin?.lastName,
       email: findAdmin?.email,
       mobile: findAdmin?.mobile,
       token: generateToken(findAdmin?._id),
@@ -104,7 +112,6 @@ const loginAdmin = asyncHandler(async (req, res) => {
 });
 
 // handle refresh token
-
 const handleRefreshToken = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
@@ -294,7 +301,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) throw new Error("User not found with this email");
   try {
-    const token = await user.createPasswordResetToken();
+    const token = await user.passwordResetToken();
     await user.save();
     const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:5000/api/user/reset-password/${token}'>Click Here</>`;
     const data = {
@@ -338,11 +345,16 @@ const getWishlist = asyncHandler(async (req, res) => {
 
 const userCart = asyncHandler(async (req, res) => {
   const { cart } = req.body;
+
   console.log(req.body.cart)
+
   const { _id } = req.user;
+
   validateMongoDbId(_id);
+
   try {
     let products = [];
+
     const user = await User.findById(_id);
     // check if user already have product in cart
     const alreadyExistCart = await Cart.findOne({ orderby: user._id });
@@ -359,6 +371,7 @@ const userCart = asyncHandler(async (req, res) => {
     //   products.push(object);
     // }
     let cartTotal = 0;
+    
     for (let i = 0; i < products.length; i++) {
       cartTotal = cartTotal + products[i].price * products[i].count;
     }
@@ -367,6 +380,7 @@ const userCart = asyncHandler(async (req, res) => {
       cartTotal,
       orderby: user?._id,
     }).save();
+
     res.json(newCart);
   } catch (error) {
     throw new Error(error);
@@ -422,114 +436,23 @@ const applyCoupon = asyncHandler(async (req, res) => {
   res.json(totalAfterDiscount);
 });
 
-const createOrder = asyncHandler(async (req, res) => {
-  const { COD, couponApplied } = req.body;
-  // console.log(req.body.COD, req.body.couponApplied)
-  // console.log(req.body)
-  const { _id } = req.user;
-  validateMongoDbId(_id);
+const getAdminByEmailController = asyncHandler ( async (req, res) =>{
   try {
-    if (COD) throw new Error("Create cash order failed");
-    const user = await User.findById(_id);
-    let userCart = await Cart.findOne({ orderby: user._id });
-    console.log(userCart)
-    let finalAmout = 0;
-    if (couponApplied && userCart.totalAfterDiscount) {
-      finalAmout = userCart.totalAfterDiscount;
-    } else {
-      finalAmout = userCart.cartTotal;
-    }
+      const email = req.params.email
+      console.log(email)
+      const user = await User.findOne({email})
+      const isAdmin = user?.role === "admin";
+      console.log(isAdmin)
 
-    let newOrder = await new Order({
-      products: userCart.products,
-      paymentIntent: {
-        id: uniqid(),
-        method: "COD",
-        amount: finalAmout,
-        status: "Cash on Delivery",
-        created: Date.now(),
-        currency: "usd",
-      },
-
-      orderby: user._id,
-      orderStatus: "Cash on Delivery",
-    }).save();
-
-    let update = userCart.products.map((item) => {
-      return {
-        updateOne: {
-          filter: { _id: item.product._id },
-          update: { $inc: { quantity: -item.count, sold: +item.count } },
-        },
-      };
-    });
-    const updated = await Product.bulkWrite(update, {});
-    res.json({ message: "success" });
+      res.send({
+          isAdmin: isAdmin
+      })
   } catch (error) {
-    throw new Error(error);
+      console.log(error.message)
   }
-});
+})
 
-const getOrders = asyncHandler(async (req, res) => {
-  const { _id } = req.user;
-  validateMongoDbId(_id);
-  try {
-    const userorders = await Order.findOne({ orderby: _id })
-      .populate("products.product")
-      .populate("orderby")
-      .exec();
-    res.json(userorders);
-  } catch (error) {
-    throw new Error(error);
-  }
-});
 
-const getAllOrders = asyncHandler(async (req, res) => {
-  try {
-    const alluserorders = await Order.find()
-      .populate("products.product")
-      .populate("orderby")
-      .exec();
-    res.json(alluserorders);
-  } catch (error) {
-    throw new Error(error);
-  }
-});
-
-const getOrderByUserId = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  validateMongoDbId(id);
-  try {
-    const userorders = await Order.findOne({ orderby: id })
-      .populate("products.product")
-      .populate("orderby")
-      .exec();
-    res.json(userorders);
-  } catch (error) {
-    throw new Error(error);
-  }
-});
-
-const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { status } = req.body;
-  const { id } = req.params;
-  validateMongoDbId(id);
-  try {
-    const updateOrderStatus = await Order.findByIdAndUpdate(
-      id,
-      {
-        orderStatus: status,
-        paymentIntent: {
-          status: status,
-        },
-      },
-      { new: true }
-    );
-    res.json(updateOrderStatus);
-  } catch (error) {
-    throw new Error(error);
-  }
-});
 
 module.exports = {
   createUser,
@@ -552,9 +475,5 @@ module.exports = {
     getUserCart,
     emptyCart,
     applyCoupon,
-    createOrder,
-    getOrders,
-    updateOrderStatus,
-    getAllOrders,
-    getOrderByUserId,
+    getAdminByEmailController,
 };

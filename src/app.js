@@ -15,11 +15,13 @@ const brandRouter = require("./app/modules/brand/brand.route");
 const colorRouter = require("./app/modules/color/color.route");
 const enqRouter = require("./app/modules/enquiry/enquiry.route");
 const couponRouter = require("./app/modules/coupon/coupon.route");
+const uploadRoutes = require('./app/modules/upload/upload.route');
 // const uploadRouter = require("./routes/uploadRoute");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const cors = require("cors");
 const { notFound, errorHandler } = require("./app/middlewares/errorHandler");
+// const { findLastOrderId, generateOrderID } = require("./app/modules/order/order.utils");
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -30,6 +32,7 @@ app.use(cookieParser());
 app.get("/", (req, res)=>{
     res.send("E-commerce backend server running")
 })
+app.use('/api/v1/uploads', uploadRoutes);
 
 app.use("/api/v1/user", authRouter);
 app.use('/api/v1/orders', orderRoutes);
@@ -51,5 +54,12 @@ app.use(errorHandler);
 //   console.log(`Server is running  at PORT ${PORT}`);
 // });
 
+// const findlst = async ()=>{
+    
+//     const test = await generateOrderID()
+//     console.log(test)
+// }
+// // console.log(test)
+// findlst()
 
 module.exports = app;

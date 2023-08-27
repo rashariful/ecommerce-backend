@@ -6,9 +6,17 @@ const validateMongoDbId = require("../../../utils/validateMongodbId");
 const createColor = asyncHandler(async (req, res) => {
   try {
     const newColor = await Color.create(req.body);
-    res.json(newColor);
+    res.status(200).json({
+      success: true,
+      message: `Create Color successfully`,
+      data: newColor
+    });
   } catch (error) {
-    throw new Error(error);
+    res.status(400).json({
+      success: false,
+      message: `Can't create Color`,
+      data: error
+    });
   }
 });
 

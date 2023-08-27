@@ -8,6 +8,7 @@ const {
   deleteProduct,
   addToWishlist,
   rating,
+  getProductBySearch,
 } = require("./product.controller");
 
 
@@ -23,5 +24,6 @@ router.get("/:id", getaProduct);
 router.delete("/:id",  deleteProduct);
 
 router.get("/", getAllProduct);
+// router.get("/search", getProductBySearch);
 
 module.exports = router;
