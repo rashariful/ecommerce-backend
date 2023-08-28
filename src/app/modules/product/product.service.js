@@ -4,6 +4,7 @@ const Product = require("./product.model");
 
 const createProductService = async (productData) =>{
     const result = await Product.create(productData)
+    console.log(result)
     return result
 }
 const updateProductService = async (productId, productData)=>{

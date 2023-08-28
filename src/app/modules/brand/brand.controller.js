@@ -5,8 +5,9 @@ const Brand = require("./brand.model");
 
 
 const createBrand = asyncHandler(async (req, res) => {
+  const brandData = req.body
   try {
-    const newBrand = createBrandService(req.body);
+    const newBrand = await createBrandService(brandData);
     res.status(200).json({
       success: true,
       message: `create brand successfully`,
@@ -20,6 +21,7 @@ const createBrand = asyncHandler(async (req, res) => {
     });
   }
 });
+
 const updateBrand = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -32,6 +34,7 @@ const updateBrand = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const deleteBrand = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -42,6 +45,7 @@ const deleteBrand = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const getBrand = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
@@ -52,14 +56,24 @@ const getBrand = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const getallBrand = asyncHandler(async (req, res) => {
   try {
-    const getallBrand = await Brand.find();
-    res.json(getallBrand);
+    const brandData = await Brand.find();
+    res.status(200).json({
+      success: true,
+      message: `Get all brand successfully`,
+      data: brandData
+    });
   } catch (error) {
-    throw new Error(error);
+    res.status(400).json({
+      success: true,
+      message: `No Found Brand`,
+      data: error
+    });
   }
 });
+
 module.exports = {
   createBrand,
   updateBrand,

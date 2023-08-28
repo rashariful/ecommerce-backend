@@ -2,10 +2,10 @@ const asyncHandler = require("express-async-handler");
 const Brand = require("./brand.model");
 
 
-const createBrandService = asyncHandler (async (brandData)=>{
+const createBrandService = async (brandData)=>{
     const result = await Brand.create(brandData)
     return result
-})
+}
 const updateBrandService = asyncHandler (async (BrandId, BrandData)=>{
     const result = await Brand.findByIdAndUpdate({_id: BrandId},{$set: BrandData})
     return result

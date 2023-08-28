@@ -15,6 +15,7 @@ const brandRouter = require("./app/modules/brand/brand.route");
 const colorRouter = require("./app/modules/color/color.route");
 const enqRouter = require("./app/modules/enquiry/enquiry.route");
 const couponRouter = require("./app/modules/coupon/coupon.route");
+const bannerRouter = require("./app/modules/banner/banner.routes");
 const uploadRoutes = require('./app/modules/upload/upload.route');
 // const uploadRouter = require("./routes/uploadRoute");
 const cookieParser = require("cookie-parser");
@@ -44,6 +45,7 @@ app.use("/api/v1/brand", brandRouter);
 app.use("/api/v1/coupon", couponRouter);
 app.use("/api/v1/color", colorRouter);
 app.use("/api/v1/enquiry", enqRouter);
+app.use("/api/v1/banner", bannerRouter);
 // app.use("/api/v1/upload", uploadRouter);
 
 app.use(notFound);

@@ -10,6 +10,7 @@ const User = require("../user/user.Model")
 const createProduct = async (req, res) => {
   try {
     const productData = req.body
+    console.log(productData)
     const product = await createProductService(productData)
 
     res.status(200).json({
@@ -19,6 +20,7 @@ const createProduct = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error)
     res.status(400).json({
       success: false,
       message: "can't create product",
