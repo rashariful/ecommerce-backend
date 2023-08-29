@@ -4,29 +4,46 @@ const Order = require("./order.model");
 // const { getSingleOrderSrc } = require("./order.service");
 const asyncHandler = require("express-async-handler");
 const { generateOrderID } = require("./order.utils");
-const { createOrderService } = require("./order.service");
-
+const { createOrderService, getSingleOrderSrc } = require("./order.service");
 
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const orderData = req.body
+    const orderData = req.body;
     // console.log(orderData)
-    const order = await createOrderService(orderData)
+    const order = await createOrderService(orderData);
     // console.log(order)
 
     res.status(200).json({
       success: true,
       message: `create Order successfully`,
-      data: order
+      data: order,
     });
-
   } catch (error) {
     res.status(400).json({
       success: false,
       message: "can't create order",
-      data: error
+      data: error,
     });
+  }
+};
+
+// Get all orders
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("userId")
+      .populate("products.product");
+    console.log(orders);
+
+    res.status(200).json({
+      success: true,
+      message: "get all orders",
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Could not get orders" });
+    console.log(error.message);
   }
 };
 
@@ -56,7 +73,6 @@ const createOrder = async (req, res) => {
 //     // console.log(newOrder)
 //     const savedOrder = await ;
 
-
 //     res.status(200).json({
 //       success: true,
 //       message: "Order success",
@@ -74,7 +90,7 @@ const createOrder = async (req, res) => {
 
 // Get orders by user ID
 // const getSingleOrder = async (req, res) => {
-  
+
 //   try {
 //     const  {id}  = req.params;
 //     const orderData = await getSingleOrderSrc(id)
@@ -92,32 +108,51 @@ const createOrder = async (req, res) => {
 const getSingleOrder = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
+  console.log(id);
   try {
-    const orderData = await Order.findById(id)
-    .populate("user")
-    .populate("products.product");
+    const orderData = await getSingleOrderSrc(id);
+    // .populate("userId")
+    // .populate("products.product");
     res.status(201).json({
-            success: true,
-            message: "Get single order success",
-            data: orderData,
-          });
+      success: true,
+      message: "Get single order success",
+      data: orderData,
+    });
   } catch (error) {
-    throw new Error(error);
+    res.status(400).json({
+      success: false,
+      message: "No Found single order",
+      data: error,
+    });
   }
 });
 
-
 // Get orders by user ID
 const getOrdersByUser = async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.query;
+  console.log(userId);
 
   try {
-    const orders = await Order.find({ user: userId });
+    const orders = await Order.find({ userId });
     res.status(201).json({
       success: true,
       message: "order success",
       data: orders,
     });
+  } catch (error) {
+    res.status(500).json({ error: "Could not get orders" });
+  }
+};
+
+// Get orders by orderStatus
+const getOrdersByStatus = async (req, res) => {
+  const { status } = req.params;
+
+  try {
+    const orders = await Order.find({ orderStatus: status })
+      .populate("userId")
+      .populate("products.product");
+    res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ error: "Could not get orders" });
   }
@@ -142,38 +177,6 @@ const updateOrderStatus = async (req, res) => {
     res.status(200).json(updatedOrder);
   } catch (error) {
     res.status(500).json({ error: "Could not update order status" });
-  }
-};
-
-// Get orders by orderStatus
-const getOrdersByStatus = async (req, res) => {
-  const { status } = req.params;
-
-  try {
-    const orders = await Order.find({ orderStatus: status })
-      .populate("user")
-      .populate("products.product");
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(500).json({ error: "Could not get orders" });
-  }
-};
-
-// Get all orders
-const getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find()
-    .populate("user")
-    .populate("products.product");
-      console.log(orders)
-
-    res.status(200).json({
-      success: true,
-      message: "get all orders",
-      data: orders,
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Could not get orders" });
   }
 };
 

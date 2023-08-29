@@ -16,9 +16,9 @@ const createOrderService = async (orderData) =>{
 }
 
 const getSingleOrderSrc = async (orderId)=>{
-    const result = await Order.findById(orderId)
-    .populate("products.product")
-    .populate("user");
+    const result = await Order.findById(orderId).populate("userId").populate("products.product")
+    // .populate("user");
+    // .populate("products.product")
     return result
 }
 

@@ -33,8 +33,8 @@ app.use(cookieParser());
 app.get("/", (req, res)=>{
     res.send("E-commerce backend server running")
 })
-app.use('/api/v1/uploads', uploadRoutes);
 
+app.use('/api/v1/uploads', uploadRoutes);
 app.use("/api/v1/user", authRouter);
 app.use('/api/v1/orders', orderRoutes);
 app.use("/api/v1/products", productRouter);
