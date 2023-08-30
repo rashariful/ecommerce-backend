@@ -57,10 +57,18 @@ const getCategory = asyncHandler(async (req, res) => {
 
 const getallCategory = asyncHandler(async (req, res) => {
   try {
-    const getallCategory = await Category.find();
-    res.json(getallCategory);
+    const categoryData = await Category.find();
+    res.status(200).json({
+      success: true,
+      message: `Get All Product Category successfully`,
+      data: categoryData
+    });
   } catch (error) {
-    throw new Error(error);
+    res.status(400).json({
+      success: true,
+      message: `No Found Product Category`,
+      data: error
+    });
   }
 });
 
