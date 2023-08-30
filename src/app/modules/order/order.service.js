@@ -22,7 +22,13 @@ const getSingleOrderSrc = async (orderId)=>{
     return result
 }
 
+const deleteOrderService = async (id)=>{
+    const result = await Order.findByIdAndDelete(id)
+    return result
+
+}
 module.exports = {
     createOrderService,
     getSingleOrderSrc,
+    deleteOrderService,
 }

@@ -3,8 +3,7 @@ const validateMongoDbId = require("../../../utils/validateMongodbId");
 const Order = require("./order.model");
 // const { getSingleOrderSrc } = require("./order.service");
 const asyncHandler = require("express-async-handler");
-const { generateOrderID } = require("./order.utils");
-const { createOrderService, getSingleOrderSrc } = require("./order.service");
+const { createOrderService, getSingleOrderSrc, deleteOrderService } = require("./order.service");
 
 // Create a new order
 const createOrder = async (req, res) => {
@@ -180,6 +179,25 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const deleteOrder = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
+  try {
+    const deleteOrder = await deleteOrderService(id);
+
+    res.status(200).json({
+      success: true,
+      message: `Delete Order successfully`,
+      data: deleteOrder
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: `Can't Delete Order`,
+      data: error
+    });
+  }
+});
 module.exports = {
   createOrder,
   getOrdersByUser,
@@ -187,4 +205,5 @@ module.exports = {
   updateOrderStatus,
   getOrdersByStatus,
   getAllOrders,
+  deleteOrder,
 };

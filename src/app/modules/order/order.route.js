@@ -20,4 +20,7 @@ router.put("/status/:orderId", orderController.updateOrderStatus);
 
 // GET route to get orders by orderStatus
 router.get("/status/:status", orderController.getOrdersByStatus);
+
+router.delete("/:id", orderController.deleteOrder);
+
 module.exports = router;
