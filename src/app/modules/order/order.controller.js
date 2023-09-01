@@ -128,14 +128,14 @@ const getSingleOrder = asyncHandler(async (req, res) => {
 
 // Get orders by user ID
 const getOrdersByUser = async (req, res) => {
-  const { userId } = req.query;
-  console.log(userId);
+  const { userId } = req.params;
+  // console.log(userId);
 
   try {
-    const orders = await Order.find({ userId });
+    const orders = await Order.find({userId});
     res.status(201).json({
       success: true,
-      message: "order success",
+      message: "Get order by user success",
       data: orders,
     });
   } catch (error) {

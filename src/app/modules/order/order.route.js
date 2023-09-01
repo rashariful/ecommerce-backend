@@ -13,7 +13,7 @@ router.get("/",orderController.getAllOrders);
 
 
 // GET route to get orders by user ID
-router.get("/search", orderController.getOrdersByUser);
+router.get("/user-orders/:userId", orderController.getOrdersByUser);
 
 // PUT route to update order status by order ID
 router.put("/status/:orderId", orderController.updateOrderStatus);
