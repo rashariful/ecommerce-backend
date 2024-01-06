@@ -33,7 +33,6 @@ const getAllOrders = async (req, res) => {
     const orders = await Order.find()
       .populate("userId")
       .populate("products.product");
-    console.log(orders);
 
     res.status(200).json({
       success: true,

@@ -8,7 +8,7 @@ const createProductService = async (productData) =>{
     return result
 }
 const updateProductService = async (productId, productData)=>{
-    const result = await Product.findByIdAndUpdate({_id: productId},{$set: productData})
+    const result = await Product.findByIdAndUpdate(productId,{$set: productData})
     return result
 
 }

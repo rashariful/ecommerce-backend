@@ -29,21 +29,41 @@ const createProduct = async (req, res) => {
   }
 };
 
+
 const getAllProduct = asyncHandler(async (req, res) => {
   try {
     // Filtering
     const queryObj = { ...req.query };
-    const excludeFields = ["page", "sort", "limit", "fields"];
+    const excludeFields = ["page", "sort", "limit", "fields", "search"]; // Add "search" to excludeFields
 
     excludeFields.forEach((el) => delete queryObj[el]);
     
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    
     let query = Product.find(JSON.parse(queryStr));
+  // Search Query
+  const searchQuery = req.query.search;
+
+  if (searchQuery) {
+    const searchFields = [
+      "title",
+      "brand",
+      "category",
+      // Add other fields you want to search here
+    ];
+
+    const searchFilters = searchFields.map((field) => ({
+      [field]: { $regex: searchQuery, $options: "i" }, // Case-insensitive search
+    }));
+
+    query = query.or(searchFilters);
+  }
+   
+   
 
     // Sorting
-
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
@@ -51,8 +71,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
       query = query.sort("-createdAt");
     }
 
-    // limiting the fields
-
+    // Limiting the fields
     if (req.query.fields) {
       const fields = req.query.fields.split(",").join(" ");
       query = query.select(fields);
@@ -60,24 +79,94 @@ const getAllProduct = asyncHandler(async (req, res) => {
       query = query.select("-__v");
     }
 
-    // pagination
-
-    const page = req.query.page;
-    const limit = req.query.limit;
+    // Pagination
+    const page = req.query.page  || 1;
+    const limit = req.query.limit || 6;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
+
     if (req.query.page) {
       const productCount = await Product.countDocuments();
-      if (skip >= productCount) throw new Error("This Page does not exists");
+      if (skip >= productCount) throw new Error("This Page does not exist");
     }
     const product = await query;
+    const total = await Product.countDocuments();
 
-    res.json(product);
+    const pageCount = Math.ceil(total/limit)
 
+    res.status(200).json({
+      success: true,
+      message: "Get all Products",
+      data: product,
+      page: page,
+      limit: limit,
+      skip: skip,
+      pageCount: pageCount
+    });
   } catch (error) {
     throw new Error(error);
   }
 });
+
+
+
+// const getAllProduct = asyncHandler(async (req, res) => {
+//   try {
+//     // Filtering
+//     const queryObj = { ...req.query };
+//     const excludeFields = ["page", "sort", "limit", "fields"];
+
+//     excludeFields.forEach((el) => delete queryObj[el]);
+    
+//     let queryStr = JSON.stringify(queryObj);
+
+//     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+//     let query = Product.find(JSON.parse(queryStr));
+
+//     // Sorting
+
+//     if (req.query.sort) {
+//       const sortBy = req.query.sort.split(",").join(" ");
+//       query = query.sort(sortBy);
+//     } else {
+//       query = query.sort("-createdAt");
+//     }
+
+//     // limiting the fields
+
+//     if (req.query.fields) {
+//       const fields = req.query.fields.split(",").join(" ");
+//       query = query.select(fields);
+//     } else {
+//       query = query.select("-__v");
+//     }
+
+//     // pagination
+
+//     const page = req.query.page;
+//     const limit = req.query.limit;
+//     const skip = (page - 1) * limit;
+//     query = query.skip(skip).limit(limit);
+//     if (req.query.page) {
+//       const productCount = await Product.countDocuments();
+//       if (skip >= productCount) throw new Error("This Page does not exists");
+//     }
+//     const product = await query;
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Get all Products",
+//       data: product,
+//       page: page,
+//       limit: limit,
+//       skip: skip
+//     });
+
+//   } catch (error) {
+//     throw new Error(error);
+//   }
+// });
 
 // server.js
 // const getProductBySearch = asyncHandler ("/api/search", async (req, res) => {
@@ -92,26 +181,37 @@ const getAllProduct = asyncHandler(async (req, res) => {
 //   }
 // });
 
-
-
 const updateProduct = asyncHandler(async (req, res) => {
-  const {id} = req.params
-  try { 
-    const updateProduct = updateProductService(id, req.body)
-
-    res.status(200).json({
-      success: true,
-      message: `update Product successfully`,
-      data: updateProduct
+  const { id } = req.params;
+  validateMongoDbId(id);
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
+      new: true,
     });
+    res.json(updatedProduct);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: `can't update`,
-      data: error
-    });
+    throw new Error(error);
   }
 });
+
+// const updateProduct = asyncHandler(async (req, res) => {
+//   const {id} = req.params
+//   try { 
+//     const updateProduct = updateProductService(id, req.body)
+
+//     res.status(200).json({
+//       success: true,
+//       message: `update Product successfully`,
+//       data: updateProduct
+//     });
+//   } catch (error) {
+//     res.status(400).json({
+//       success: false,
+//       message: `can't update`,
+//       data: error
+//     });
+//   }
+// });
 
 const deleteProduct = asyncHandler(async (req, res) => {
   const {id} = req.params;

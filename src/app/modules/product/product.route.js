@@ -15,7 +15,7 @@ const {
 const router = express.Router();
 
 router.post("/create-product", createProduct);
-router.patch("/:id",  updateProduct);
+router.put("/:id",  updateProduct);
 
 router.put("/wishlist",  addToWishlist);
 router.put("/rating",  rating);
